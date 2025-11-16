@@ -9,7 +9,8 @@ public record class CreatePetDto
 
     [Required, StringLength(40)]
     public string Species { get; init; } = null!; 
+    public DateTime DateOfBirth { get; init; }
 
     [Required]
-    public Guid UserId { get; init; }
+    public Guid UserId { get; set; }
 }

@@ -28,35 +28,65 @@ namespace VetCareAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("ClinicId")
+                        .HasColumnType("char(36)");
+
                     b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("FullName")
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
-                    b.Property<string>("FullName")
+                    b.Property<string>("Role")
                         .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("varchar(120)");
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClinicId");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", t =>
+                        {
+                            t.HasCheckConstraint("CK_Users_Role", "Role IN ('Admin','ClinicStaff','User')");
+                        });
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Email = "rokas@example.com",
-                            FullName = "Rokas Meškauskas"
+                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            Email = "admin@gmail.com",
+                            FullName = "System Admin",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFBlcphBR2VdzREjobOqd+lyX079u33WlqzjAnURuM/kwQlKCpy2wZ9nsLSK4blkvg==",
+                            Role = "Admin"
                         },
                         new
                         {
-                            Id = new Guid("22222222-2222-2222-2222-333333333333"),
-                            Email = "auste@example.com",
-                            FullName = "Austė Petrauskaitė"
+                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                            Email = "owner@gmail.com",
+                            FullName = "Demo Owner",
+                            PasswordHash = "AQAAAAIAAYagAAAAEL2Z/MDnmseAtqaj5Rvr/0HSykjkIuh/D5b5aHUdn1yiqNI9BUHoCxlUZYhA2eInBw==",
+                            Role = "User"
+                        },
+                        new
+                        {
+                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                            ClinicId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Email = "staff@gmail.com",
+                            FullName = "Kaunas Vet Staff",
+                            PasswordHash = "AQAAAAIAAYagAAAAEP3ggSAiRexQx1Oe6+uWxRHVlvNEsJ1YMv+Ma9M3WL5HujKS3pVHg1OBJ9GKMGrtyA==",
+                            Role = "ClinicStaff"
                         });
                 });
 
@@ -128,22 +158,64 @@ namespace VetCareAPI.Migrations
                             Id = new Guid("33333333-3333-3333-3333-111111111111"),
                             Name = "Maksis",
                             Species = "Dog",
-                            UserId = new Guid("22222222-2222-2222-2222-222222222222")
+                            UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-222222222222"),
                             Name = "Murka",
                             Species = "Cat",
-                            UserId = new Guid("22222222-2222-2222-2222-222222222222")
+                            UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Name = "Pūkis",
                             Species = "Rabbit",
-                            UserId = new Guid("22222222-2222-2222-2222-333333333333")
+                            UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         });
+                });
+
+            modelBuilder.Entity("VetCareAPI.Models.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Device")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ReplacedByTokenHash")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("RevokedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("VetCareAPI.Models.Visit", b =>
@@ -173,17 +245,22 @@ namespace VetCareAPI.Migrations
                     b.Property<Guid>("PetId")
                         .HasColumnType("char(36)");
 
-                    b.Property<int>("Reason")
-                        .HasColumnType("int");
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
 
-                    b.Property<int?>("Severity")
-                        .HasColumnType("int");
+                    b.Property<string>("Severity")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
 
                     b.Property<DateTime>("StartsAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
 
                     b.HasKey("Id");
 
@@ -201,10 +278,10 @@ namespace VetCareAPI.Migrations
                             EndsAt = new DateTime(2025, 9, 15, 9, 30, 0, 0, DateTimeKind.Utc),
                             Notes = "Vaccination completed.",
                             PetId = new Guid("33333333-3333-3333-3333-111111111111"),
-                            Reason = 1,
-                            Severity = 0,
+                            Reason = "Vaccination",
+                            Severity = "Mild",
                             StartsAt = new DateTime(2025, 9, 15, 9, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 1
+                            Status = "Completed"
                         },
                         new
                         {
@@ -214,10 +291,10 @@ namespace VetCareAPI.Migrations
                             EndsAt = new DateTime(2025, 10, 12, 9, 0, 0, 0, DateTimeKind.Utc),
                             Notes = "Annual check.",
                             PetId = new Guid("33333333-3333-3333-3333-111111111111"),
-                            Reason = 0,
-                            Severity = 1,
+                            Reason = "Checkup",
+                            Severity = "Moderate",
                             StartsAt = new DateTime(2025, 10, 12, 8, 30, 0, 0, DateTimeKind.Utc),
-                            Status = 0
+                            Status = "Scheduled"
                         },
                         new
                         {
@@ -227,10 +304,10 @@ namespace VetCareAPI.Migrations
                             EndsAt = new DateTime(2025, 10, 20, 14, 30, 0, 0, DateTimeKind.Utc),
                             Notes = "Dental check.",
                             PetId = new Guid("33333333-3333-3333-3333-222222222222"),
-                            Reason = 5,
-                            Severity = 0,
+                            Reason = "Dental",
+                            Severity = "Mild",
                             StartsAt = new DateTime(2025, 10, 20, 14, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 0
+                            Status = "Scheduled"
                         },
                         new
                         {
@@ -240,11 +317,21 @@ namespace VetCareAPI.Migrations
                             EndsAt = new DateTime(2025, 10, 5, 16, 30, 0, 0, DateTimeKind.Utc),
                             Notes = "Owner cancelled day before.",
                             PetId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            Reason = 2,
-                            Severity = 1,
+                            Reason = "Illness",
+                            Severity = "Moderate",
                             StartsAt = new DateTime(2025, 10, 5, 16, 0, 0, 0, DateTimeKind.Utc),
-                            Status = 2
+                            Status = "Cancelled"
                         });
+                });
+
+            modelBuilder.Entity("VetCareAPI.Models.AppUser", b =>
+                {
+                    b.HasOne("VetCareAPI.Models.Clinic", "Clinic")
+                        .WithMany("Staff")
+                        .HasForeignKey("ClinicId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Clinic");
                 });
 
             modelBuilder.Entity("VetCareAPI.Models.Pet", b =>
@@ -253,6 +340,17 @@ namespace VetCareAPI.Migrations
                         .WithMany("Pets")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("VetCareAPI.Models.RefreshToken", b =>
+                {
+                    b.HasOne("VetCareAPI.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -284,6 +382,8 @@ namespace VetCareAPI.Migrations
 
             modelBuilder.Entity("VetCareAPI.Models.Clinic", b =>
                 {
+                    b.Navigation("Staff");
+
                     b.Navigation("Visits");
                 });
 

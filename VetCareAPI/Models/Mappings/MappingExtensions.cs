@@ -18,13 +18,13 @@ public static class MappingExtensions
     { e.Name = d.Name; e.City = d.City; e.Address = d.Address; }
 
     public static AppUserDto ToDto(this AppUser u) =>
-        new(u.Id, u.FullName, u.Email);
+        new(u.Id, u.FullName, u.Email, u.PasswordHash);
 
     public static AppUser ToEntity(this CreateAppUserDto d) =>
         new() { Id = Guid.NewGuid(), FullName = d.FullName, Email = d.Email };
 
     public static PetDto ToDto(this Pet p) =>
-        new(p.Id, p.Name, p.Species, p.UserId);
+        new(p.Id, p.Name, p.Species, p.DateOfBirth, p.UserId);
 
     public static Pet ToEntity(this CreatePetDto d) =>
         new() { Id = Guid.NewGuid(), Name = d.Name, Species = d.Species, UserId = d.UserId };

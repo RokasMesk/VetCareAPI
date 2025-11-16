@@ -11,13 +11,20 @@ public class AppUser
     public Guid Id { get; set; }
 
     [MaxLength(120)]
-    public string FullName { get; set; } = null!;
+    public string? FullName { get; set; } = string.Empty;
+    public string? Email { get; set; } = string.Empty;
 
     [MaxLength(200)]
-    public string Email { get; set; } = null!;
+    public string PasswordHash { get; set; } = string.Empty;
 
-    // Future-ready: you can add navigation to roles later
-    // public ICollection<UserRole> Roles { get; set; } = new List<UserRole>();
+    [MaxLength(32)]
+    public string Role { get; set; } = Roles.User;
+    
 
-    public ICollection<Pet> Pets { get; set; } = new List<Pet>();
+    // if its a simple user, and it has pets
+    public ICollection<Pet>? Pets { get; set; } = new List<Pet>();
+    
+    // if user is a worker in a clinic
+    public Guid? ClinicId { get; set; }
+    public Clinic?  Clinic { get; set; }
 }

@@ -1,7 +1,13 @@
 using System.Reflection;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using VetCareAPI.Data;
+using VetCareAPI.Models;
 using VetCareAPI.Repositories;
 using VetCareAPI.Services;
 
@@ -16,11 +22,40 @@ builder.Services.AddDbContext<ApplicationDbContext>(opt =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("db"))
     ));
 
-// builder.Services.Configure<ApiBehaviorOptions>(options =>
-// {
-//     options.InvalidModelStateResponseFactory = ctx =>
-//         new UnprocessableEntityObjectResult(ctx.ModelState);
-// });
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+
+var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!;
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key));
+
+builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
+    p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()
+)); 
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opt =>
+    {
+        opt.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = jwt.Issuer,
+            ValidAudience = jwt.Audience,
+            IssuerSigningKey = key,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30),
+            RoleClaimType = ClaimTypes.Role,
+            NameClaimType = ClaimTypes.NameIdentifier
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    // Example policy for clinic scoping later if needed
+    options.AddPolicy("ClinicStaffOnly", p => p.RequireRole(Roles.ClinicStaff));
+});
+
 
 builder.Services.AddScoped<ClinicRepository>();
 builder.Services.AddScoped<AppUserRepository>();
@@ -29,6 +64,8 @@ builder.Services.AddScoped<VisitRepository>();
 builder.Services.AddScoped<VisitService>();
 builder.Services.AddScoped<PetService>();
 builder.Services.AddScoped<ClinicService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -46,17 +83,19 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 
-// app.UseAuthentication();
-// app.UseAuthorization();
 
+
+app.UseSwagger();
 app.MapControllers();
 
 app.Run();
