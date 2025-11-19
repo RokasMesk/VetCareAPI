@@ -4,6 +4,8 @@ public record class ClinicDto(
     Guid Id,
     string Name,
     string City,
-    string Address
+    string Phone,
+    string Address,
+    string? Photo
 );
 

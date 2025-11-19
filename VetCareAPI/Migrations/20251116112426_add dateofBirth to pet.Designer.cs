@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VetCareAPI.Data;
 
@@ -11,9 +12,11 @@ using VetCareAPI.Data;
 namespace VetCareAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251116112426_add dateofBirth to pet")]
+    partial class adddateofBirthtopet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,13 +111,6 @@ namespace VetCareAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Photo")
-                        .HasColumnType("longtext");
-
                     b.HasKey("Id");
 
                     b.ToTable("Clinics");
@@ -125,16 +121,14 @@ namespace VetCareAPI.Migrations
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Address = "Laisvės al. 1",
                             City = "Kaunas",
-                            Name = "ZooVet Kaunas",
-                            Phone = "+37060000001"
+                            Name = "ZooVet Kaunas"
                         },
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-222222222222"),
                             Address = "Gedimino pr. 2",
                             City = "Vilnius",
-                            Name = "VetHelp Vilnius",
-                            Phone = "+37060000002"
+                            Name = "VetHelp Vilnius"
                         });
                 });
 

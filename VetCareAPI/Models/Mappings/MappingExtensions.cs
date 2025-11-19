@@ -9,13 +9,27 @@ namespace VetCareAPI.Models.Mappings;
 public static class MappingExtensions
 {
     public static ClinicDto ToDto(this Clinic e) =>
-        new(e.Id, e.Name, e.City, e.Address);
+        new(e.Id, e.Name, e.City, e.Phone, e.Address, e.Photo);
 
     public static Clinic ToEntity(this CreateClinicDto d) =>
-        new() { Id = Guid.NewGuid(), Name = d.Name, City = d.City, Address = d.Address };
+        new()
+        {
+            Id = Guid.NewGuid(),
+            Name = d.Name,
+            City = d.City,
+            Phone = d.Phone,
+            Address = d.Address,
+            Photo = d.Photo
+        };
 
     public static void Apply(this Clinic e, UpdateClinicDto d)
-    { e.Name = d.Name; e.City = d.City; e.Address = d.Address; }
+    {
+        e.Name = d.Name;
+        e.City = d.City;
+        e.Phone = d.Phone;
+        e.Address = d.Address;
+        e.Photo = d.Photo;
+    }
 
     public static AppUserDto ToDto(this AppUser u) =>
         new(u.Id, u.FullName, u.Email, u.PasswordHash);
@@ -27,10 +41,21 @@ public static class MappingExtensions
         new(p.Id, p.Name, p.Species, p.DateOfBirth, p.UserId);
 
     public static Pet ToEntity(this CreatePetDto d) =>
-        new() { Id = Guid.NewGuid(), Name = d.Name, Species = d.Species, UserId = d.UserId };
+        new()
+        {
+            Id = Guid.NewGuid(),
+            Name = d.Name,
+            Species = d.Species,
+            DateOfBirth = d.DateOfBirth.Date,
+            UserId = d.UserId
+        };
 
     public static void Apply(this Pet p, UpdatePetDto d)
-    { p.Name = d.Name; p.Species = d.Species; }
+    {
+        p.Name = d.Name;
+        p.Species = d.Species;
+        p.DateOfBirth = d.DateOfBirth.Date;
+    }
 
     public static VisitDto ToDto(this Visit v) =>
         new(v.Id, v.StartsAt, v.EndsAt, v.Notes, v.Status, v.Reason,

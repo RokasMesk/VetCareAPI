@@ -16,6 +16,14 @@ public class AuthController(ITokenService tokens, IUserService users) : Controll
     public record RefreshRequest(string RefreshToken);
     public record InviteAcceptDto(string InviteToken, string Password); // if you later add invites
 
+    // Admin: create clinic staff
+    public record CreateClinicStaffDto(
+        string Email,
+        string Password,
+        string? FullName,
+        Guid ClinicId
+    );
+
     /// <summary>
     /// Public: Owner self-registration
     /// </summary>
@@ -86,4 +94,28 @@ public class AuthController(ITokenService tokens, IUserService users) : Controll
     [Authorize(Roles = Roles.Admin)]
     [HttpGet("admin-check")]
     public IActionResult AdminCheck() => Ok(new { ok = true, role = Roles.Admin });
+
+    /// <summary>
+    /// Admin-only: create clinic staff user for a specific clinic
+    /// </summary>
+    [Authorize(Roles = Roles.Admin)]
+    [HttpPost("create-clinic-staff")]
+    public async Task<IActionResult> CreateClinicStaff([FromBody] CreateClinicStaffDto dto, CancellationToken ct)
+    {
+        // ensure clinic exists
+        var db = HttpContext.RequestServices.GetRequiredService<VetCareAPI.Data.ApplicationDbContext>();
+        var clinic = await db.Clinics.FindAsync([dto.ClinicId], ct);
+        if (clinic is null)
+            return NotFound(new { error = "Clinic not found" });
+
+        // email uniqueness
+        var existing = await users.FindByEmailAsync(dto.Email, ct);
+        if (existing is not null)
+            return Conflict(new { error = "Email already registered" });
+
+        var user = await users.CreateAsync(dto.Email, dto.Password, Roles.ClinicStaff, dto.FullName, dto.ClinicId, ct);
+
+        // you can later swap to a slimmer DTO if you want
+        return Ok(new { user.Id, user.FullName, user.Email, user.Role, user.ClinicId });
+    }
 }

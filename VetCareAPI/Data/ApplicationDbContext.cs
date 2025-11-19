@@ -88,8 +88,22 @@ public class ApplicationDbContext : DbContext
         var clinicVilnius = Guid.Parse("11111111-1111-1111-1111-222222222222");
 
         model.Entity<Clinic>().HasData(
-            new Clinic { Id = clinicKaunas, Name = "ZooVet Kaunas", City = "Kaunas", Address = "Laisvės al. 1" },
-            new Clinic { Id = clinicVilnius, Name = "VetHelp Vilnius", City = "Vilnius", Address = "Gedimino pr. 2" }
+            new Clinic
+            {
+                Id = clinicKaunas,
+                Name = "ZooVet Kaunas",
+                City = "Kaunas",
+                Phone = "+37060000001",
+                Address = "Laisvės al. 1"
+            },
+            new Clinic
+            {
+                Id = clinicVilnius,
+                Name = "VetHelp Vilnius",
+                City = "Vilnius",
+                Phone = "+37060000002",
+                Address = "Gedimino pr. 2"
+            }
         );
 
         // Users (using your precomputed hashes; no UserName used)
@@ -133,9 +147,30 @@ public class ApplicationDbContext : DbContext
         var petPukis = Guid.Parse("33333333-3333-3333-3333-333333333333");
 
         model.Entity<Pet>().HasData(
-            new Pet { Id = petMaksis, Name = "Maksis", Species = "Dog", UserId = ownerId },
-            new Pet { Id = petMurka, Name = "Murka", Species = "Cat", UserId = ownerId },
-            new Pet { Id = petPukis, Name = "Pūkis", Species = "Rabbit", UserId = ownerId }
+            new Pet
+            {
+                Id = petMaksis,
+                Name = "Maksis",
+                Species = "Dog",
+                DateOfBirth = new DateTime(2020, 1, 15),
+                UserId = ownerId
+            },
+            new Pet
+            {
+                Id = petMurka,
+                Name = "Murka",
+                Species = "Cat",
+                DateOfBirth = new DateTime(2021, 5, 3),
+                UserId = ownerId
+            },
+            new Pet
+            {
+                Id = petPukis,
+                Name = "Pūkis",
+                Species = "Rabbit",
+                DateOfBirth = new DateTime(2022, 9, 10),
+                UserId = ownerId
+            }
         );
 
         // Visits

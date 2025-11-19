@@ -1,6 +1,7 @@
 namespace VetCareAPI.Models.DTOs.Pets;
-using System.ComponentModel.DataAnnotations;
 
+using System;
+using System.ComponentModel.DataAnnotations;
 
 public record class UpdatePetDto
 {
@@ -9,4 +10,8 @@ public record class UpdatePetDto
 
     [Required, StringLength(40)]
     public string Species { get; init; } = null!;
+
+    [Required]
+    [DataType(DataType.Date)]
+    public DateTime DateOfBirth { get; init; }
 }

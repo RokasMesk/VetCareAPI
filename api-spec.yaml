@@ -1,0 +1,1401 @@
+openapi: 3.0.3
+info:
+  title: VetCare API
+  description: API for veterinary clinic management system
+  version: 1.0.0
+  contact:
+    name: VetCare API Support
+
+servers:
+  - url: https://api.vetcare.example.com
+    description: Production server
+  - url: http://localhost:5000
+    description: Development server
+
+tags:
+  - name: Auth
+    description: Authentication and authorization endpoints
+  - name: Clinics
+    description: Clinic management endpoints
+  - name: Pets
+    description: Pet management endpoints
+  - name: Visits
+    description: Visit management endpoints
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /api/auth/login or /api/auth/register
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        message:
+          type: string
+          description: Error message (alternative field name)
+
+    # Auth schemas
+    RegisterDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "owner@example.com"
+        password:
+          type: string
+          format: password
+          example: "SecurePassword123!"
+        fullName:
+          type: string
+          nullable: true
+          example: "John Doe"
+
+    LoginDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "owner@example.com"
+        password:
+          type: string
+          format: password
+          example: "SecurePassword123!"
+
+    RefreshRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expiresAtUtc:
+          type: string
+          format: date-time
+          example: "2024-12-31T23:59:59Z"
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    CreateClinicStaffDto:
+      type: object
+      required:
+        - email
+        - password
+        - clinicId
+      properties:
+        email:
+          type: string
+          format: email
+          example: "staff@clinic.com"
+        password:
+          type: string
+          format: password
+          example: "SecurePassword123!"
+        fullName:
+          type: string
+          nullable: true
+          example: "Jane Smith"
+        clinicId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+
+    ClinicStaffResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        clinicId:
+          type: string
+          format: uuid
+          nullable: true
+
+    # Clinic schemas
+    ClinicDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Happy Paws Veterinary Clinic"
+        city:
+          type: string
+          example: "Vilnius"
+        phone:
+          type: string
+          example: "+37061234567"
+        address:
+          type: string
+          example: "Gedimino pr. 1, Vilnius"
+        photo:
+          type: string
+          nullable: true
+          example: "https://example.com/clinic-photo.jpg"
+
+    CreateClinicDto:
+      type: object
+      required:
+        - name
+        - city
+        - phone
+        - address
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          example: "Happy Paws Veterinary Clinic"
+        city:
+          type: string
+          maxLength: 120
+          example: "Vilnius"
+        phone:
+          type: string
+          maxLength: 50
+          example: "+37061234567"
+        address:
+          type: string
+          maxLength: 200
+          example: "Gedimino pr. 1, Vilnius"
+        photo:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: "https://example.com/clinic-photo.jpg"
+
+    UpdateClinicDto:
+      type: object
+      required:
+        - name
+        - city
+        - phone
+        - address
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          example: "Happy Paws Veterinary Clinic"
+        city:
+          type: string
+          maxLength: 120
+          example: "Vilnius"
+        phone:
+          type: string
+          maxLength: 50
+          example: "+37061234567"
+        address:
+          type: string
+          maxLength: 200
+          example: "Gedimino pr. 1, Vilnius"
+        photo:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: "https://example.com/clinic-photo.jpg"
+
+    # Pet schemas
+    PetDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        name:
+          type: string
+          example: "Buddy"
+        species:
+          type: string
+          example: "Dog"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "2020-05-15"
+        userId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+
+    CreatePetDto:
+      type: object
+      required:
+        - name
+        - species
+        - dateOfBirth
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          example: "Buddy"
+        species:
+          type: string
+          maxLength: 40
+          example: "Dog"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "2020-05-15"
+        userId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+
+    UpdatePetDto:
+      type: object
+      required:
+        - name
+        - species
+        - dateOfBirth
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          example: "Buddy"
+        species:
+          type: string
+          maxLength: 40
+          example: "Dog"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "2020-05-15"
+
+    # Visit schemas
+    VisitStatus:
+      type: integer
+      enum: [0, 1, 2]
+      description: |
+        0 - Scheduled
+        1 - Completed
+        2 - Cancelled
+
+    VisitReason:
+      type: integer
+      enum: [0, 1, 2, 3, 4, 5, 6, 7]
+      description: |
+        0 - Checkup
+        1 - Vaccination
+        2 - Illness
+        3 - Injury
+        4 - FollowUp
+        5 - Dental
+        6 - Surgery
+        7 - Other
+
+    Severity:
+      type: integer
+      enum: [0, 1, 2, 3]
+      nullable: true
+      description: |
+        0 - Mild
+        1 - Moderate
+        2 - Severe
+        3 - Critical
+
+    VisitDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174003"
+        startsAt:
+          type: string
+          format: date-time
+          example: "2024-12-20T10:00:00Z"
+        endsAt:
+          type: string
+          format: date-time
+          example: "2024-12-20T11:00:00Z"
+        notes:
+          type: string
+          nullable: true
+          maxLength: 1000
+          example: "Regular checkup, all good"
+        status:
+          $ref: '#/components/schemas/VisitStatus'
+        reason:
+          $ref: '#/components/schemas/VisitReason'
+        chiefComplaint:
+          type: string
+          nullable: true
+          example: "Limping on front left paw"
+        diagnosisCode:
+          type: string
+          nullable: true
+          example: "S72.9"
+        diagnosisText:
+          type: string
+          nullable: true
+          example: "Fracture of unspecified part of femur"
+        severity:
+          $ref: '#/components/schemas/Severity'
+        clinicId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        petId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+
+    CreateVisitDto:
+      type: object
+      required:
+        - startsAt
+        - endsAt
+        - clinicId
+        - petId
+      properties:
+        startsAt:
+          type: string
+          format: date-time
+          example: "2024-12-20T10:00:00Z"
+        endsAt:
+          type: string
+          format: date-time
+          example: "2024-12-20T11:00:00Z"
+        notes:
+          type: string
+          nullable: true
+          maxLength: 1000
+          example: "Regular checkup"
+        clinicId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        petId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        reason:
+          type: integer
+          nullable: true
+          enum: [0, 1, 2, 3, 4, 5, 6, 7]
+          example: 0
+        chiefComplaint:
+          type: string
+          nullable: true
+          example: "Limping on front left paw"
+        diagnosisCode:
+          type: string
+          nullable: true
+          example: "S72.9"
+        diagnosisText:
+          type: string
+          nullable: true
+          example: "Fracture"
+        severity:
+          type: integer
+          nullable: true
+          enum: [0, 1, 2, 3]
+          example: 1
+
+    UpdateVisitDto:
+      type: object
+      required:
+        - startsAt
+        - endsAt
+        - status
+        - reason
+      properties:
+        startsAt:
+          type: string
+          format: date-time
+          example: "2024-12-20T10:00:00Z"
+        endsAt:
+          type: string
+          format: date-time
+          example: "2024-12-20T11:00:00Z"
+        notes:
+          type: string
+          nullable: true
+          maxLength: 1000
+          example: "Regular checkup, all good"
+        status:
+          $ref: '#/components/schemas/VisitStatus'
+        reason:
+          $ref: '#/components/schemas/VisitReason'
+        chiefComplaint:
+          type: string
+          nullable: true
+          example: "Limping on front left paw"
+        diagnosisCode:
+          type: string
+          nullable: true
+          example: "S72.9"
+        diagnosisText:
+          type: string
+          nullable: true
+          example: "Fracture of unspecified part of femur"
+        severity:
+          $ref: '#/components/schemas/Severity'
+
+paths:
+  # Auth endpoints
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user (owner)
+      description: Public endpoint for owner self-registration
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+            example:
+              email: "owner@example.com"
+              password: "SecurePassword123!"
+              fullName: "John Doe"
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+              example:
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3OC0xMjM0LTU2NzgtODkwMS0xMjM0NTY3ODkwMTIiLCJyb2xlIjoiVXNlciIsImV4cCI6MTczNDU2Nzg5MH0.example"
+                expiresAtUtc: "2024-12-20T12:00:00Z"
+                refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh_token_example"
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Email already registered"
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email and password
+      description: Public endpoint for user authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+            example:
+              email: "owner@example.com"
+              password: "SecurePassword123!"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+              example:
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3OC0xMjM0LTU2NzgtODkwMS0xMjM0NTY3ODkwMTIiLCJyb2xlIjoiVXNlciIsImV4cCI6MTczNDU2Nzg5MH0.example"
+                expiresAtUtc: "2024-12-20T12:00:00Z"
+                refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh_token_example"
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Invalid credentials"
+
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      description: Public endpoint to refresh access token using refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+            example:
+              refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh_token_example"
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+              example:
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.new_access_token"
+                expiresAtUtc: "2024-12-20T12:00:00Z"
+                refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.new_refresh_token"
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Invalid or expired refresh token"
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout and revoke refresh token
+      description: Revokes the current refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+            example:
+              refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh_token_example"
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logged out successfully"
+
+  /api/auth/admin-check:
+    get:
+      tags: [Auth]
+      summary: Check admin access
+      description: Admin-only endpoint to verify admin role
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Admin access confirmed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  role:
+                    type: string
+                    example: "Admin"
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - not an admin
+
+  /api/auth/create-clinic-staff:
+    post:
+      tags: [Auth]
+      summary: Create clinic staff user (Admin only)
+      description: Admin-only endpoint to create a clinic staff user for a specific clinic
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClinicStaffDto'
+            example:
+              email: "staff@clinic.com"
+              password: "SecurePassword123!"
+              fullName: "Jane Smith"
+              clinicId: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Clinic staff created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicStaffResponse'
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174004"
+                fullName: "Jane Smith"
+                email: "staff@clinic.com"
+                role: "ClinicStaff"
+                clinicId: "123e4567-e89b-12d3-a456-426614174000"
+        '404':
+          description: Clinic not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Clinic not found"
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Email already registered"
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - not an admin
+
+  # Clinic endpoints
+  /api/clinics:
+    get:
+      tags: [Clinics]
+      summary: Get all clinics
+      description: Public endpoint to retrieve all clinics
+      security: []
+      responses:
+        '200':
+          description: List of clinics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClinicDto'
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174000"
+                  name: "Happy Paws Veterinary Clinic"
+                  city: "Vilnius"
+                  phone: "+37061234567"
+                  address: "Gedimino pr. 1, Vilnius"
+                  photo: "https://example.com/clinic-photo.jpg"
+                - id: "123e4567-e89b-12d3-a456-426614174005"
+                  name: "Pet Care Center"
+                  city: "Kaunas"
+                  phone: "+37061234568"
+                  address: "Laisvės pr. 10, Kaunas"
+                  photo: null
+
+    post:
+      tags: [Clinics]
+      summary: Create a new clinic (Admin only)
+      description: Admin-only endpoint to create a new clinic
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClinicDto'
+            example:
+              name: "Happy Paws Veterinary Clinic"
+              city: "Vilnius"
+              phone: "+37061234567"
+              address: "Gedimino pr. 1, Vilnius"
+              photo: "https://example.com/clinic-photo.jpg"
+      responses:
+        '201':
+          description: Clinic created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicDto'
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                name: "Happy Paws Veterinary Clinic"
+                city: "Vilnius"
+                phone: "+37061234567"
+                address: "Gedimino pr. 1, Vilnius"
+                photo: "https://example.com/clinic-photo.jpg"
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - not an admin
+
+  /api/clinics/{id}:
+    get:
+      tags: [Clinics]
+      summary: Get clinic by ID
+      description: Public endpoint to retrieve a specific clinic by ID
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Clinic found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicDto'
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                name: "Happy Paws Veterinary Clinic"
+                city: "Vilnius"
+                phone: "+37061234567"
+                address: "Gedimino pr. 1, Vilnius"
+                photo: "https://example.com/clinic-photo.jpg"
+        '404':
+          description: Clinic not found
+
+    put:
+      tags: [Clinics]
+      summary: Update clinic (Admin or Clinic Staff)
+      description: Update clinic information. Admin can update any clinic, Clinic Staff can only update their own clinic.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClinicDto'
+            example:
+              name: "Happy Paws Veterinary Clinic Updated"
+              city: "Vilnius"
+              phone: "+37061234567"
+              address: "Gedimino pr. 1, Vilnius"
+              photo: "https://example.com/new-clinic-photo.jpg"
+      responses:
+        '204':
+          description: Clinic updated successfully
+        '404':
+          description: Clinic not found
+        '422':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Clinic Staff trying to update different clinic
+
+    delete:
+      tags: [Clinics]
+      summary: Delete clinic (Admin or Clinic Staff)
+      description: Delete a clinic. Admin can delete any clinic, Clinic Staff can only delete their own clinic.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '204':
+          description: Clinic deleted successfully
+        '404':
+          description: Clinic not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Clinic Staff trying to delete different clinic
+
+  /api/clinics/{id}/visits:
+    get:
+      tags: [Clinics]
+      summary: Get visits for a clinic (Admin or Clinic Staff)
+      description: Retrieve all visits for a specific clinic, optionally filtered by date range
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        - name: fromUtc
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          example: "2024-12-01T00:00:00Z"
+        - name: toUtc
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          example: "2024-12-31T23:59:59Z"
+      responses:
+        '200':
+          description: List of visits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VisitDto'
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174003"
+                  startsAt: "2024-12-20T10:00:00Z"
+                  endsAt: "2024-12-20T11:00:00Z"
+                  notes: "Regular checkup"
+                  status: 0
+                  reason: 0
+                  chiefComplaint: null
+                  diagnosisCode: null
+                  diagnosisText: null
+                  severity: null
+                  clinicId: "123e4567-e89b-12d3-a456-426614174000"
+                  petId: "123e4567-e89b-12d3-a456-426614174001"
+        '404':
+          description: Clinic not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  # Pet endpoints
+  /api/pets:
+    get:
+      tags: [Pets]
+      summary: Get all pets (Admin only)
+      description: Admin-only endpoint to retrieve all pets
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all pets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PetDto'
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174001"
+                  name: "Buddy"
+                  species: "Dog"
+                  dateOfBirth: "2020-05-15"
+                  userId: "123e4567-e89b-12d3-a456-426614174002"
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - not an admin
+
+    post:
+      tags: [Pets]
+      summary: Create a new pet (User only)
+      description: User-only endpoint to create a new pet. UserId is automatically set from the authenticated user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePetDto'
+            example:
+              name: "Buddy"
+              species: "Dog"
+              dateOfBirth: "2020-05-15"
+      responses:
+        '201':
+          description: Pet created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetDto'
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174001"
+                name: "Buddy"
+                species: "Dog"
+                dateOfBirth: "2020-05-15"
+                userId: "123e4567-e89b-12d3-a456-426614174002"
+        '422':
+          description: Validation error or invalid operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: "Invalid user ID"
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - not a user
+
+  /api/pets/{id}:
+    get:
+      tags: [Pets]
+      summary: Get pet by ID
+      description: Retrieve a specific pet by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+      responses:
+        '200':
+          description: Pet found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetDto'
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174001"
+                name: "Buddy"
+                species: "Dog"
+                dateOfBirth: "2020-05-15"
+                userId: "123e4567-e89b-12d3-a456-426614174002"
+        '404':
+          description: Pet not found
+        '401':
+          description: Unauthorized
+
+    put:
+      tags: [Pets]
+      summary: Update pet (User only)
+      description: User-only endpoint to update pet information
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePetDto'
+            example:
+              name: "Buddy Updated"
+              species: "Dog"
+              dateOfBirth: "2020-05-15"
+      responses:
+        '204':
+          description: Pet updated successfully
+        '404':
+          description: Pet not found
+        '422':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - not a user
+
+    delete:
+      tags: [Pets]
+      summary: Delete pet (User only)
+      description: User-only endpoint to delete a pet
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+      responses:
+        '204':
+          description: Pet deleted successfully
+        '404':
+          description: Pet not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - not a user
+
+  /api/pets/me:
+    get:
+      tags: [Pets]
+      summary: Get my pets (User only)
+      description: User-only endpoint to retrieve all pets belonging to the authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of user's pets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PetDto'
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174001"
+                  name: "Buddy"
+                  species: "Dog"
+                  dateOfBirth: "2020-05-15"
+                  userId: "123e4567-e89b-12d3-a456-426614174002"
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - not a user
+
+  /api/pets/by-user/{userId}:
+    get:
+      tags: [Pets]
+      summary: Get pets by user ID (Admin or User)
+      description: Retrieve all pets belonging to a specific user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+      responses:
+        '200':
+          description: List of user's pets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PetDto'
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174001"
+                  name: "Buddy"
+                  species: "Dog"
+                  dateOfBirth: "2020-05-15"
+                  userId: "123e4567-e89b-12d3-a456-426614174002"
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  # Visit endpoints
+  /api/visits:
+    post:
+      tags: [Visits]
+      summary: Create a new visit
+      description: Create a new visit. Available to User, Clinic Staff, and Admin.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVisitDto'
+            example:
+              startsAt: "2024-12-20T10:00:00Z"
+              endsAt: "2024-12-20T11:00:00Z"
+              notes: "Regular checkup"
+              clinicId: "123e4567-e89b-12d3-a456-426614174000"
+              petId: "123e4567-e89b-12d3-a456-426614174001"
+              reason: 0
+              chiefComplaint: null
+              diagnosisCode: null
+              diagnosisText: null
+              severity: null
+      responses:
+        '201':
+          description: Visit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitDto'
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174003"
+                startsAt: "2024-12-20T10:00:00Z"
+                endsAt: "2024-12-20T11:00:00Z"
+                notes: "Regular checkup"
+                status: 0
+                reason: 0
+                chiefComplaint: null
+                diagnosisCode: null
+                diagnosisText: null
+                severity: null
+                clinicId: "123e4567-e89b-12d3-a456-426614174000"
+                petId: "123e4567-e89b-12d3-a456-426614174001"
+        '422':
+          description: Validation error or invalid operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: "Invalid clinic or pet ID"
+        '401':
+          description: Unauthorized
+
+  /api/visits/{id}:
+    get:
+      tags: [Visits]
+      summary: Get visit by ID
+      description: Retrieve a specific visit by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174003"
+      responses:
+        '200':
+          description: Visit found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitDto'
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174003"
+                startsAt: "2024-12-20T10:00:00Z"
+                endsAt: "2024-12-20T11:00:00Z"
+                notes: "Regular checkup, all good"
+                status: 1
+                reason: 0
+                chiefComplaint: "Limping on front left paw"
+                diagnosisCode: "S72.9"
+                diagnosisText: "Fracture of unspecified part of femur"
+                severity: 1
+                clinicId: "123e4567-e89b-12d3-a456-426614174000"
+                petId: "123e4567-e89b-12d3-a456-426614174001"
+        '404':
+          description: Visit not found
+        '401':
+          description: Unauthorized
+
+    put:
+      tags: [Visits]
+      summary: Update visit
+      description: Update visit information. Available to User, Clinic Staff, and Admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174003"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVisitDto'
+            example:
+              startsAt: "2024-12-20T10:00:00Z"
+              endsAt: "2024-12-20T11:00:00Z"
+              notes: "Regular checkup, all good"
+              status: 1
+              reason: 0
+              chiefComplaint: "Limping on front left paw"
+              diagnosisCode: "S72.9"
+              diagnosisText: "Fracture of unspecified part of femur"
+              severity: 1
+      responses:
+        '204':
+          description: Visit updated successfully
+        '404':
+          description: Visit not found
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: "Invalid status transition"
+        '401':
+          description: Unauthorized
+
+    delete:
+      tags: [Visits]
+      summary: Delete visit
+      description: Delete a visit. Available to User, Clinic Staff, and Admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174003"
+      responses:
+        '204':
+          description: Visit deleted successfully
+        '404':
+          description: Visit not found
+        '401':
+          description: Unauthorized
+
+  /api/visits/pet/{petId}:
+    get:
+      tags: [Visits]
+      summary: Get visits by pet ID
+      description: Retrieve all visits for a specific pet, optionally filtered by date range. Available to User, Admin, and Clinic Staff.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        - name: fromUtc
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          example: "2024-12-01T00:00:00Z"
+        - name: toUtc
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          example: "2024-12-31T23:59:59Z"
+      responses:
+        '200':
+          description: List of visits for the pet
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VisitDto'
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174003"
+                  startsAt: "2024-12-20T10:00:00Z"
+                  endsAt: "2024-12-20T11:00:00Z"
+                  notes: "Regular checkup"
+                  status: 0
+                  reason: 0
+                  chiefComplaint: null
+                  diagnosisCode: null
+                  diagnosisText: null
+                  severity: null
+                  clinicId: "123e4567-e89b-12d3-a456-426614174000"
+                  petId: "123e4567-e89b-12d3-a456-426614174001"
+        '401':
+          description: Unauthorized
+
+  /api/visits/clinic/{clinicId}:
+    get:
+      tags: [Visits]
+      summary: Get visits by clinic ID (Clinic Staff or Admin)
+      description: Retrieve all visits for a specific clinic, optionally filtered by date range
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clinicId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        - name: fromUtc
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          example: "2024-12-01T00:00:00Z"
+        - name: toUtc
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          example: "2024-12-31T23:59:59Z"
+      responses:
+        '200':
+          description: List of visits for the clinic
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VisitDto'
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174003"
+                  startsAt: "2024-12-20T10:00:00Z"
+                  endsAt: "2024-12-20T11:00:00Z"
+                  notes: "Regular checkup"
+                  status: 0
+                  reason: 0
+                  chiefComplaint: null
+                  diagnosisCode: null
+                  diagnosisText: null
+                  severity: null
+                  clinicId: "123e4567-e89b-12d3-a456-426614174000"
+                  petId: "123e4567-e89b-12d3-a456-426614174001"
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
